@@ -8,6 +8,26 @@ const daysAgo = (n: number) => {
   return d.toISOString().split("T")[0];
 };
 
+export function computeRescueScore(p: {
+  last_active_date: string;
+  confidence_score: number;
+  motivation_score: number;
+  monetisation_score: number;
+  platform_fit_score: number;
+  effort_score: number;
+}): number {
+  const daysSince = Math.max(0, (today.getTime() - new Date(p.last_active_date).getTime()) / 86400000);
+  const recency = Math.max(0, 10 - daysSince / 3);
+  return Math.round(
+    (recency * 0.25 +
+      p.confidence_score * 0.2 +
+      p.motivation_score * 0.15 +
+      p.monetisation_score * 0.15 +
+      (10 - p.effort_score) * 0.15 +
+      p.platform_fit_score * 0.1) * 10
+  );
+}
+
 export interface SeedProject {
   id: string;
   name: string;
@@ -63,17 +83,12 @@ export interface SeedPrompt {
   last_used_date: string;
 }
 
-function computeRescueScore(p: { last_active_date: string; confidence_score: number; motivation_score: number; monetisation_score: number; platform_fit_score: number; effort_score: number }): number {
-  const daysSince = Math.max(0, (today.getTime() - new Date(p.last_active_date).getTime()) / 86400000);
-  const recency = Math.max(0, 10 - daysSince / 3);
-  return Math.round(
-    (recency * 0.25 +
-      p.confidence_score * 0.20 +
-      p.motivation_score * 0.15 +
-      p.monetisation_score * 0.15 +
-      (10 - p.effort_score) * 0.15 +
-      p.platform_fit_score * 0.10) * 10
-  );
+export function withDerivedProjectFields<T extends Omit<SeedProject, "rescue_score" | "is_stalled"> & Partial<Pick<SeedProject, "rescue_score" | "is_stalled">>>(project: T): SeedProject {
+  return {
+    ...project,
+    rescue_score: computeRescueScore(project),
+    is_stalled: new Date(project.last_active_date) < new Date(today.getTime() - 7 * 86400000),
+  };
 }
 
 const projectsRaw = [
@@ -89,11 +104,7 @@ const projectsRaw = [
   { id: "p10", name: "OpenClaw Prompt Pipeline", short_description: "Local AI automation setup for chaining prompts across coding tasks", status: "stalled", project_type: "automation", platform_name: "Cursor", platform_logo_slug: "cursor", account_label: "Primary", last_active_date: daysAgo(9), next_action: "Write up the current architecture properly before changing anything else", blocker_summary: "The individual pieces work but the prompt chaining is inconsistent.", confidence_score: 6, motivation_score: 7, monetisation_score: 5, platform_fit_score: 8, effort_score: 6, priority: 2 },
 ];
 
-export const seedProjects: SeedProject[] = projectsRaw.map((p) => ({
-  ...p,
-  rescue_score: computeRescueScore(p),
-  is_stalled: new Date(p.last_active_date) < new Date(today.getTime() - 7 * 86400000),
-}));
+export const seedProjects: SeedProject[] = projectsRaw.map((p) => withDerivedProjectFields(p));
 
 export const seedAccounts: SeedAccount[] = [
   { id: "a1", label: "Primary", email_address: "hughnicholls@gmail.com", login_method: "Google", preferred_use_case: "Main Lovable builds, Supabase, Vercel deployments", best_for_platform: "Lovable", is_active: true, last_used_date: daysAgo(0) },
