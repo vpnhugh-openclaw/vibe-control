@@ -49,6 +49,20 @@ export interface SeedUpdate {
   created_at: string;
 }
 
+export interface SeedPrompt {
+  id: string;
+  title: string;
+  category: string;
+  prompt_text: string;
+  effectiveness_rating: number;
+  linked_platforms: string[];
+  linked_project_ids: string[];
+  tags: string[];
+  notes: string;
+  date_added: string;
+  last_used_date: string;
+}
+
 function computeRescueScore(p: { last_active_date: string; confidence_score: number; motivation_score: number; monetisation_score: number; platform_fit_score: number; effort_score: number }): number {
   const daysSince = Math.max(0, (today.getTime() - new Date(p.last_active_date).getTime()) / 86400000);
   const recency = Math.max(0, 10 - daysSince / 3);
@@ -96,6 +110,61 @@ export const seedUpdates: SeedUpdate[] = [
   { id: "u6", project_name: "RxTracker Pro", type: "assessment", content: "Ran stall diagnosis. Main issue is schema complexity, not motivation. Rescue score: 68.", created_at: new Date(today.getTime() - 168 * 3600000).toISOString() },
   { id: "u7", project_name: "Compounding Price Scraper", type: "note", content: "The BeautifulSoup approach can't handle dynamic pagination. Need to switch to Playwright.", created_at: new Date(today.getTime() - 240 * 3600000).toISOString() },
   { id: "u8", project_name: "Patient Consent Form Builder", type: "status_change", content: "Paused — ran out of Base44 credits mid-build. Frustrating because it was going well.", created_at: new Date(today.getTime() - 360 * 3600000).toISOString() },
+];
+
+export const seedPrompts: SeedPrompt[] = [
+  {
+    id: "prm1",
+    title: "Lovable schema rescue prompt",
+    category: "rescue",
+    prompt_text: "## Goal\nRefactor the schema without adding new features.\n\n### Constraints\n- keep the existing auth flow\n- do not add stock management yet\n- focus only on prescription -> dispense\n\n### Output\n1. revised schema\n2. migration SQL\n3. updated queries",
+    effectiveness_rating: 5,
+    linked_platforms: ["Lovable"],
+    linked_project_ids: ["p1"],
+    tags: ["schema", "rescue", "supabase"],
+    notes: "Worked best when the current schema was pasted directly below the prompt.",
+    date_added: daysAgo(2),
+    last_used_date: daysAgo(1),
+  },
+  {
+    id: "prm2",
+    title: "Prompt for diagnosing flaky AI build chains",
+    category: "debugging",
+    prompt_text: "You are reviewing a multi-step AI workflow that produces inconsistent output.\n\nPlease identify:\n- where determinism is being lost\n- what to simplify\n- the smallest reproducible test case\n- a rewrite of the system prompt",
+    effectiveness_rating: 4,
+    linked_platforms: ["Cursor", "OpenRouter"],
+    linked_project_ids: ["p10"],
+    tags: ["debugging", "prompting", "workflow"],
+    notes: "Solid for architecture reviews, less useful for UI generation.",
+    date_added: daysAgo(9),
+    last_used_date: daysAgo(6),
+  },
+  {
+    id: "prm3",
+    title: "Mobile layout polish pass",
+    category: "ui",
+    prompt_text: "Review this React + Tailwind screen at 375px width.\n\nReturn:\n- the 3 highest-impact overflow issues\n- exact class changes to fix them\n- any touch target problems\n- any spacing inconsistencies",
+    effectiveness_rating: 4,
+    linked_platforms: ["VS Code + Copilot", "Lovable"],
+    linked_project_ids: ["p2", "p9"],
+    tags: ["mobile", "ui", "tailwind"],
+    notes: "Great for tightening final responsive polish.",
+    date_added: daysAgo(5),
+    last_used_date: daysAgo(2),
+  },
+  {
+    id: "prm4",
+    title: "Rescue prompt for paused credit-limited builds",
+    category: "rescue",
+    prompt_text: "This project is paused due to credit limits on the current platform.\n\nCompare these options:\n1. finish in place\n2. migrate to Lovable\n3. reduce scope and ship a smaller version\n\nReturn a recommendation with the lowest-effort path to launch.",
+    effectiveness_rating: 3,
+    linked_platforms: ["Base44", "Lovable"],
+    linked_project_ids: ["p4"],
+    tags: ["credits", "migration", "rescue"],
+    notes: "Best when paired with a quick feature inventory first.",
+    date_added: daysAgo(11),
+    last_used_date: daysAgo(10),
+  },
 ];
 
 export const seedPromotions = [

@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { timeAgo, cn } from "@/lib/utils";
 import { Save, Loader2, Paperclip } from "lucide-react";
+import { toast } from "sonner";
 
 const STATUSES = ["idea", "planning", "building", "testing", "launched", "paused", "stalled", "abandoned"];
 const PROJECT_TYPES = ["web_app", "mobile_app", "automation", "website_revamp", "scraping_tool", "api_integration", "pharmacy_business", "research_workflow", "other"];
@@ -292,7 +293,7 @@ export function ProjectDrawer({ project, open, onClose, onSave, onAddNote, updat
                 {isRunningAssessment ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Run AI Stall Assessment
               </Button>
-              <Button variant="outline" disabled={!assessment}>Save Fix Prompt to Vault</Button>
+              <Button variant="outline" disabled={!assessment} onClick={() => assessment && toast.success("Fix prompt ready for Prompt Vault prefill flow")}>Save Fix Prompt to Vault</Button>
               <Button variant="outline" disabled={!assessment} onClick={saveAssessmentToLog}>Save Assessment to Project Log</Button>
             </div>
 

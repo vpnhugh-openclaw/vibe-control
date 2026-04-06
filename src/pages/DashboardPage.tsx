@@ -1,15 +1,20 @@
+import { useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PlatformBadge } from "@/components/PlatformBadge";
 import { AccountBadge } from "@/components/AccountBadge";
-import { RescueScoreArc } from "@/components/RescueScoreArc";
 import { seedProjects, seedUpdates } from "@/lib/seedData";
+import { mockAI, type WeeklyReviewResult } from "@/lib/mockAI";
 import { timeAgo } from "@/lib/utils";
 import { AreaChart, Area, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
+import { Button } from "@/components/ui/button";
 
 const ACCENT_COLORS = ["#7c5cfc", "#22d3ee", "#f59e0b", "#4ade80", "#f87171", "#8a8680"];
 
 export default function DashboardPage() {
+  const [weeklyReview, setWeeklyReview] = useState<WeeklyReviewResult | null>(null);
+  const [reviewLoading, setReviewLoading] = useState(false);
+
   const total = seedProjects.length;
   const active = seedProjects.filter((p) => ["building", "testing", "launched"].includes(p.status)).length;
   const stalled = seedProjects.filter((p) => p.is_stalled).length;
@@ -47,6 +52,16 @@ export default function DashboardPage() {
   const attentionProjects = seedProjects
     .filter((p) => new Date(p.last_active_date) < new Date(Date.now() - 14 * 86400000))
     .sort((a, b) => new Date(a.last_active_date).getTime() - new Date(b.last_active_date).getTime());
+
+  const runWeeklyReview = async () => {
+    setReviewLoading(true);
+    try {
+      const result = await mockAI("weekly_review") as WeeklyReviewResult;
+      setWeeklyReview(result);
+    } finally {
+      setReviewLoading(false);
+    }
+  };
 
   return (
     <AppShell title="Dashboard">
@@ -154,6 +169,32 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      <div className="mt-6 bg-card card-shadow rounded-lg p-5">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-section-heading font-semibold">AI Weekly Review</h2>
+            <p className="text-body text-muted-foreground">Get a structured review of what needs attention this week.</p>
+          </div>
+          <Button onClick={runWeeklyReview} variant="outline" disabled={reviewLoading}>
+            {reviewLoading ? "Generating..." : weeklyReview ? "Regenerate" : "Generate"}
+          </Button>
+        </div>
+
+        {!weeklyReview ? (
+          <div className="rounded-lg border border-dashed border-border p-6 text-body text-muted-foreground">
+            Generate the weekly review to see losing momentum, available credits, rescue opportunities, and recommended focus.
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            <ReviewPanel title="Losing momentum" items={weeklyReview.losing_momentum} />
+            <ReviewPanel title="Available credits" items={weeklyReview.available_credits} />
+            <ReviewPanel title="Worth rescuing" items={weeklyReview.worth_rescuing} />
+            <ReviewPanel title="Ignore this week" items={weeklyReview.ignore_this_week} />
+            <ReviewPanel title="Recommended focus" items={weeklyReview.recommended_focus} />
+          </div>
+        )}
+      </div>
+
       {/* Row 5: Attention List */}
       {attentionProjects.length > 0 && (
         <div className="mt-6 bg-card card-shadow rounded-lg p-5">
@@ -183,5 +224,16 @@ export default function DashboardPage() {
         </div>
       )}
     </AppShell>
+  );
+}
+
+function ReviewPanel({ title, items }: { title: string; items: string[] }) {
+  return (
+    <div className="rounded-lg border border-border p-4">
+      <h3 className="font-semibold text-foreground">{title}</h3>
+      <ul className="mt-3 space-y-2 text-body text-muted-foreground">
+        {items.map((item) => <li key={item}>• {item}</li>)}
+      </ul>
+    </div>
   );
 }
