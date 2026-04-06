@@ -16,3 +16,11 @@ export function timeAgo(dateStr: string): string {
   if (days === 1) return "1 day ago";
   return `${days}d ago`;
 }
+
+export function formatDate(dateStr: string): string {
+  return new Intl.DateTimeFormat("en-AU", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(dateStr));
+}
