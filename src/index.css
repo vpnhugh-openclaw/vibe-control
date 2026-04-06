@@ -1,96 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --font-sans: 'DM Sans', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Light mode */
+    --bg-page: 30 11% 95%;
+    --bg-card: 30 14% 97%;
+    --bg-elevated: 0 0% 100%;
+    --bg-active: 30 8% 92%;
+    --border: 0 0% 0% / 0.08;
+    --divider: 0 0% 0% / 0.05;
+    --text-primary: 40 5% 10%;
+    --text-secondary: 20 5% 39%;
+    --text-muted: 20 3% 67%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    /* Map to shadcn tokens */
+    --background: var(--bg-page);
+    --foreground: var(--text-primary);
+    --card: var(--bg-card);
+    --card-foreground: var(--text-primary);
+    --popover: var(--bg-elevated);
+    --popover-foreground: var(--text-primary);
+    --primary: 252 96% 68%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: var(--bg-active);
+    --secondary-foreground: var(--text-primary);
+    --muted: var(--bg-active);
+    --muted-foreground: var(--text-secondary);
+    --accent: var(--bg-active);
+    --accent-foreground: var(--text-primary);
+    --destructive: 0 84% 71%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 0% / 0.08;
+    --input: 0 0% 0% / 0.08;
+    --ring: 252 96% 68%;
+    --radius: 10px;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Accent palette */
+    --accent-violet: 252 96% 68%;
+    --accent-cyan: 187 85% 53%;
+    --accent-amber: 38 92% 50%;
+    --accent-green: 142 69% 58%;
+    --accent-red: 0 91% 71%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar */
+    --sidebar-background: var(--bg-card);
+    --sidebar-foreground: var(--text-primary);
+    --sidebar-primary: 252 96% 68%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: var(--bg-active);
+    --sidebar-accent-foreground: var(--text-primary);
+    --sidebar-border: 0 0% 0% / 0.08;
+    --sidebar-ring: 252 96% 68%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --bg-page: 20 8% 5%;
+    --bg-card: 24 8% 8%;
+    --bg-elevated: 20 7% 11%;
+    --bg-active: 15 5% 13%;
+    --border: 0 0% 100% / 0.07;
+    --divider: 0 0% 100% / 0.05;
+    --text-primary: 30 7% 94%;
+    --text-secondary: 24 3% 52%;
+    --text-muted: 20 3% 27%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --background: var(--bg-page);
+    --foreground: var(--text-primary);
+    --card: var(--bg-card);
+    --card-foreground: var(--text-primary);
+    --popover: var(--bg-elevated);
+    --popover-foreground: var(--text-primary);
+    --primary: 252 96% 68%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: var(--bg-active);
+    --secondary-foreground: var(--text-primary);
+    --muted: var(--bg-active);
+    --muted-foreground: var(--text-secondary);
+    --accent: var(--bg-active);
+    --accent-foreground: var(--text-primary);
+    --destructive: 0 84% 71%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 100% / 0.07;
+    --input: 0 0% 100% / 0.07;
+    --ring: 252 96% 68%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-background: var(--bg-card);
+    --sidebar-foreground: var(--text-primary);
+    --sidebar-primary: 252 96% 68%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: var(--bg-active);
+    --sidebar-accent-foreground: var(--text-primary);
+    --sidebar-border: 0 0% 100% / 0.07;
+    --sidebar-ring: 252 96% 68%;
   }
 }
 
@@ -99,7 +107,86 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    font-family: var(--font-sans);
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+
+  /* Tabular nums for all numeric data */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  /* Monospace utility */
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+@layer components {
+  .card-shadow {
+    box-shadow: 0 1px 3px oklch(0 0 0 / 0.25), 0 4px 16px oklch(0 0 0 / 0.15);
+  }
+
+  .card-hover {
+    transition: transform 150ms ease-out, box-shadow 150ms ease-out;
+  }
+
+  .card-hover:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px oklch(0 0 0 / 0.3), 0 8px 24px oklch(0 0 0 / 0.2);
+  }
+
+  /* Status badge colors */
+  .badge-idea { @apply bg-muted text-muted-foreground; }
+  .badge-planning { @apply bg-muted text-muted-foreground; }
+  .badge-building { background: hsl(var(--accent-violet) / 0.15); color: hsl(var(--accent-violet)); }
+  .badge-testing { background: hsl(var(--accent-cyan) / 0.15); color: hsl(var(--accent-cyan)); }
+  .badge-launched { background: hsl(var(--accent-green) / 0.15); color: hsl(var(--accent-green)); }
+  .badge-paused { background: hsl(var(--accent-amber) / 0.15); color: hsl(var(--accent-amber)); }
+  .badge-stalled { background: hsl(var(--accent-amber) / 0.15); color: hsl(var(--accent-amber)); }
+  .badge-abandoned { background: hsl(var(--accent-red) / 0.15); color: hsl(var(--accent-red)); }
+
+  /* Prompt text block */
+  .prompt-block {
+    @apply bg-card font-mono text-sm rounded-md p-4;
+    border-left: 2px solid hsl(var(--accent-violet));
+  }
+
+  /* Shimmer skeleton */
+  .shimmer {
+    @apply animate-pulse rounded-md;
+    background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--bg-elevated)) 50%, hsl(var(--muted)) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+}
+
+/* react-calendar-heatmap overrides */
+.react-calendar-heatmap .color-empty {
+  fill: hsl(var(--bg-active));
+}
+.react-calendar-heatmap .color-scale-1 {
+  fill: hsl(var(--accent-cyan) / 0.2);
+}
+.react-calendar-heatmap .color-scale-2 {
+  fill: hsl(var(--accent-cyan) / 0.4);
+}
+.react-calendar-heatmap .color-scale-3 {
+  fill: hsl(var(--accent-cyan) / 0.65);
+}
+.react-calendar-heatmap .color-scale-4 {
+  fill: hsl(var(--accent-cyan));
 }
