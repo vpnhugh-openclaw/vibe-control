@@ -1,21 +1,23 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { MarkdownPanel } from "@/components/content/MarkdownPanel";
-import { seedModels, seedPromotions } from "@/lib/seedData";
+import { useModels, usePromotions } from "@/hooks/useAppData";
 import creditsContent from "../../content/credits.md?raw";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 export default function CreditsPage() {
-  const confirmed = seedPromotions.filter((promo) => promo.freshness === "confirmed").length;
-  const freeModels = seedModels.filter((model) => model.is_free_tier).length;
+  const promotions = usePromotions();
+  const models = useModels();
+  const confirmed = promotions.filter((promo) => promo.freshness === "confirmed").length;
+  const freeModels = models.filter((model) => model.is_free_tier).length;
 
   return (
     <AppShell title="Credits & Models">
       <div className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <StatCard label="Promotions" value={seedPromotions.length} />
+          <StatCard label="Promotions" value={promotions.length} />
           <StatCard label="Confirmed" value={confirmed} />
-          <StatCard label="Models" value={seedModels.length} />
+          <StatCard label="Models" value={models.length} />
           <StatCard label="Free-tier models" value={freeModels} />
         </div>
 
@@ -23,7 +25,7 @@ export default function CreditsPage() {
           <div className="rounded-xl border border-border bg-card p-5 card-shadow">
             <h2 className="text-section-heading font-semibold">Credit opportunities</h2>
             <div className="mt-4 space-y-3">
-              {seedPromotions.map((promo) => (
+              {promotions.map((promo) => (
                 <div key={promo.id} className="rounded-lg border border-border p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
@@ -45,7 +47,7 @@ export default function CreditsPage() {
             <div className="rounded-xl border border-border bg-card p-5 card-shadow">
               <h2 className="text-section-heading font-semibold">Model recommendations</h2>
               <div className="mt-4 space-y-3">
-                {seedModels.map((model) => (
+                {models.map((model) => (
                   <div key={model.id} className="rounded-lg border border-border p-4">
                     <p className="font-medium text-foreground">{model.model_name}</p>
                     <p className="text-body text-muted-foreground">{model.provider} · {model.best_for.join(", ")}</p>

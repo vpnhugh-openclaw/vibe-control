@@ -1,7 +1,6 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { MarkdownPanel } from "@/components/content/MarkdownPanel";
-import { seedAccounts } from "@/lib/seedData";
-import { useProjects } from "@/hooks/useAppData";
+import { useAccounts, useProjects } from "@/hooks/useAppData";
 import accountsContent from "../../content/accounts.md?raw";
 import { Mail, ShieldCheck, Layers, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -9,14 +8,15 @@ import { Button } from "@/components/ui/button";
 
 export default function AccountsPage() {
   const [projects] = useProjects();
-  const activeAccounts = seedAccounts.filter((account) => account.is_active).length;
+  const accounts = useAccounts();
+  const activeAccounts = accounts.filter((account) => account.is_active).length;
   const platformsCovered = new Set(projects.map((project) => project.platform_name)).size;
 
   return (
     <AppShell title="Accounts">
       <div className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <SummaryCard label="Accounts" value={seedAccounts.length} icon={Mail} />
+          <SummaryCard label="Accounts" value={accounts.length} icon={Mail} />
           <SummaryCard label="Active" value={activeAccounts} icon={ShieldCheck} />
           <SummaryCard label="Platforms in use" value={platformsCovered} icon={Layers} />
           <SummaryCard label="Linked spend lanes" value={3} icon={DollarSign} />
@@ -26,7 +26,7 @@ export default function AccountsPage() {
           <div className="rounded-xl border border-border bg-card p-5 card-shadow">
             <h2 className="text-section-heading font-semibold">Account roster</h2>
             <div className="mt-4 space-y-3">
-              {seedAccounts.map((account) => {
+              {accounts.map((account) => {
                 const projectCount = projects.filter((project) => project.account_label === account.label).length;
                 return (
                   <div key={account.id} className="rounded-lg border border-border p-4">

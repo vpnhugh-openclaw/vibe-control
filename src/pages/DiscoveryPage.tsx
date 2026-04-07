@@ -1,19 +1,20 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { MarkdownPanel } from "@/components/content/MarkdownPanel";
-import { seedDiscovery } from "@/lib/seedData";
+import { useDiscovery } from "@/hooks/useAppData";
 import discoveryContent from "../../content/discovery.md?raw";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 export default function DiscoveryPage() {
-  const bookmarked = seedDiscovery.filter((item) => item.is_bookmarked).length;
-  const highRelevance = seedDiscovery.filter((item) => item.relevance_score >= 4).length;
+  const discoveryItems = useDiscovery();
+  const bookmarked = discoveryItems.filter((item) => item.is_bookmarked).length;
+  const highRelevance = discoveryItems.filter((item) => item.relevance_score >= 4).length;
 
   return (
     <AppShell title="Discovery Feed">
       <div className="space-y-4">
         <div className="grid gap-4 md:grid-cols-3">
-          <Metric label="Items" value={seedDiscovery.length} />
+          <Metric label="Items" value={discoveryItems.length} />
           <Metric label="High relevance" value={highRelevance} />
           <Metric label="Bookmarked" value={bookmarked} />
         </div>
@@ -22,7 +23,7 @@ export default function DiscoveryPage() {
           <div className="rounded-xl border border-border bg-card p-5 card-shadow">
             <h2 className="text-section-heading font-semibold">Latest finds</h2>
             <div className="mt-4 space-y-3">
-              {seedDiscovery.map((item) => (
+              {discoveryItems.map((item) => (
                 <div key={item.id} className="rounded-lg border border-border p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>

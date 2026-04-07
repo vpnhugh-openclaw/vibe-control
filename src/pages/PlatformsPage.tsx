@@ -1,7 +1,6 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { MarkdownPanel } from "@/components/content/MarkdownPanel";
-import { seedModels } from "@/lib/seedData";
-import { useProjects } from "@/hooks/useAppData";
+import { useModels, useProjects } from "@/hooks/useAppData";
 import platformsContent from "../../content/platforms.md?raw";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -19,6 +18,7 @@ const platformMeta: Record<string, { category: string; bestFor: string }> = {
 
 export default function PlatformsPage() {
   const [projects] = useProjects();
+  const models = useModels();
   const platforms = [...new Set(projects.map((project) => project.platform_name))];
 
   return (
@@ -48,7 +48,7 @@ export default function PlatformsPage() {
           <div className="rounded-xl border border-border bg-card p-5 card-shadow">
             <h2 className="text-section-heading font-semibold">Models in rotation</h2>
             <div className="mt-4 space-y-3">
-              {seedModels.map((model) => (
+              {models.map((model) => (
                 <div key={model.id} className="rounded-lg border border-border p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>

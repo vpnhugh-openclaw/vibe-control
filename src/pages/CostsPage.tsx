@@ -1,20 +1,23 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { MarkdownPanel } from "@/components/content/MarkdownPanel";
-import { seedCosts } from "@/lib/seedData";
+import { useCosts, useProjects } from "@/hooks/useAppData";
 import costsContent from "../../content/costs.md?raw";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 export default function CostsPage() {
-  const totalSpend = seedCosts.reduce((sum, item) => sum + item.amount, 0);
-  const subscriptions = seedCosts.filter((item) => item.entry_type === "subscription").length;
-  const oneOff = seedCosts.filter((item) => item.entry_type === "one_off").length;
+  const costs = useCosts();
+  const [projects] = useProjects();
+  const projectNameById = new Map(projects.map((project) => [project.id, project.name]));
+  const totalSpend = costs.reduce((sum, item) => sum + item.amount, 0);
+  const subscriptions = costs.filter((item) => item.entry_type === "subscription").length;
+  const oneOff = costs.filter((item) => item.entry_type === "one_off").length;
 
   return (
     <AppShell title="Cost Tracker">
       <div className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <CostCard label="Tracked entries" value={seedCosts.length.toString()} />
+          <CostCard label="Tracked entries" value={costs.length.toString()} />
           <CostCard label="Total spend" value={`$${totalSpend.toFixed(0)}`} />
           <CostCard label="Subscriptions" value={subscriptions.toString()} />
           <CostCard label="One-off costs" value={oneOff.toString()} />
@@ -35,12 +38,12 @@ export default function CostsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {seedCosts.map((item) => (
+                  {costs.map((item) => (
                     <tr key={item.id} className="border-b border-border last:border-0">
                       <td className="py-3 pr-4 font-medium text-foreground">{item.platform}</td>
                       <td className="py-3 pr-4 text-foreground">{item.currency} {item.amount}</td>
                       <td className="py-3 pr-4 text-muted-foreground">{item.account_label}</td>
-                      <td className="py-3 pr-4 text-muted-foreground">{item.project_name ?? "—"}</td>
+                      <td className="py-3 pr-4 text-muted-foreground">{item.project_id ? projectNameById.get(item.project_id) ?? "Unknown project" : "—"}</td>
                       <td className="py-3 text-muted-foreground">{item.notes ?? "—"}</td>
                     </tr>
                   ))}
