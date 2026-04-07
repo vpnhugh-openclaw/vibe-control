@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { SeedProject, type SeedPrompt, type SeedUpdate } from "@/lib/seedData";
+import type { SeedProject, SeedPrompt, SeedUpdate } from "@/lib/seedData";
 import { mockAI, type StallAssessmentResult } from "@/lib/mockAI";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

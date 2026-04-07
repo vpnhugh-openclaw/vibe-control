@@ -16,6 +16,7 @@ export default function DashboardPage() {
   const [updates] = useUpdates();
   const [weeklyReview, setWeeklyReview] = useState<WeeklyReviewResult | null>(null);
   const [reviewLoading, setReviewLoading] = useState(false);
+  const projectNameById = new Map(projects.map((project) => [project.id, project.name]));
 
   const total = projects.length;
   const active = projects.filter((p) => ["building", "testing", "launched"].includes(p.status)).length;
@@ -162,7 +163,7 @@ export default function DashboardPage() {
             <div key={u.id} className="flex items-start gap-3 py-2 border-b border-border last:border-0">
               <span className="text-label text-accent-violet font-medium shrink-0 capitalize">{u.type.replace("_", " ")}</span>
               <div className="flex-1 min-w-0">
-                <span className="font-medium text-body">{u.project_name}</span>
+                <span className="font-medium text-body">{projectNameById.get(u.project_id) ?? "Unknown project"}</span>
                 <p className="text-muted-foreground text-body truncate">{u.content}</p>
               </div>
               <span className="text-label text-muted-foreground shrink-0 tabular-nums">{timeAgo(u.created_at)}</span>
