@@ -27,7 +27,7 @@ export interface WeeklyReviewResult {
   recommended_focus: string[];
 }
 
-const MOCK_STALL_ASSESSMENT: StallAssessmentResult = {
+export const MOCK_STALL_ASSESSMENT: StallAssessmentResult = {
   stall_causes: [
     {
       cause: "Schema complexity outgrew the initial design",
@@ -63,7 +63,7 @@ const MOCK_STALL_ASSESSMENT: StallAssessmentResult = {
   fix_prompt: "The data model for RxTracker Pro needs restructuring. The current schema has a prescription table, a dispense table, and a stock table with circular references that break queries. I need you to: 1) Review the current schema I'll paste below. 2) Propose a cleaner prescription → dispense relationship that doesn't require stock management. 3) Write the migration SQL. 4) Update any affected queries. Do NOT add any new features — only fix the schema. Current schema: [paste schema here]",
 };
 
-const MOCK_WEEKLY_REVIEW: WeeklyReviewResult = {
+export const MOCK_WEEKLY_REVIEW: WeeklyReviewResult = {
   losing_momentum: [
     "Compounding Price Scraper — 18 days stalled, the Playwright approach hasn't been tried yet",
     "Patient Consent Form Builder — 22 days paused, waiting on credits or platform migration",
