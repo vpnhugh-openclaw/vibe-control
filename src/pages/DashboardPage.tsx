@@ -3,7 +3,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PlatformBadge } from "@/components/PlatformBadge";
 import { AccountBadge } from "@/components/AccountBadge";
-import { seedProjects, seedUpdates } from "@/lib/seedData";
+import { useProjects, useUpdates } from "@/hooks/useAppData";
 import { mockAI, type WeeklyReviewResult } from "@/lib/mockAI";
 import { timeAgo } from "@/lib/utils";
 import { AreaChart, Area, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
@@ -12,13 +12,15 @@ import { Button } from "@/components/ui/button";
 const ACCENT_COLORS = ["#7c5cfc", "#22d3ee", "#f59e0b", "#4ade80", "#f87171", "#8a8680"];
 
 export default function DashboardPage() {
+  const [projects] = useProjects();
+  const [updates] = useUpdates();
   const [weeklyReview, setWeeklyReview] = useState<WeeklyReviewResult | null>(null);
   const [reviewLoading, setReviewLoading] = useState(false);
 
-  const total = seedProjects.length;
-  const active = seedProjects.filter((p) => ["building", "testing", "launched"].includes(p.status)).length;
-  const stalled = seedProjects.filter((p) => p.is_stalled).length;
-  const needingAttention = seedProjects.filter(
+  const total = projects.length;
+  const active = projects.filter((p) => ["building", "testing", "launched"].includes(p.status)).length;
+  const stalled = projects.filter((p) => p.is_stalled).length;
+  const needingAttention = projects.filter(
     (p) => p.is_stalled && new Date(p.last_active_date) < new Date(Date.now() - 14 * 86400000) && !p.next_action
   ).length;
 
@@ -34,22 +36,22 @@ export default function DashboardPage() {
 
   // Platform distribution
   const platformCounts: Record<string, number> = {};
-  seedProjects.forEach((p) => { platformCounts[p.platform_name] = (platformCounts[p.platform_name] || 0) + 1; });
+  projects.forEach((p) => { platformCounts[p.platform_name] = (platformCounts[p.platform_name] || 0) + 1; });
   const platformData = Object.entries(platformCounts).map(([name, value]) => ({ name, value }));
 
   // Account distribution
   const accountCounts: Record<string, number> = {};
-  seedProjects.forEach((p) => { accountCounts[p.account_label] = (accountCounts[p.account_label] || 0) + 1; });
+  projects.forEach((p) => { accountCounts[p.account_label] = (accountCounts[p.account_label] || 0) + 1; });
   const accountData = Object.entries(accountCounts).map(([name, value]) => ({ name, value }));
 
   // Rescue ranking
-  const rescueProjects = seedProjects
+  const rescueProjects = projects
     .filter((p) => ["stalled", "paused"].includes(p.status))
     .sort((a, b) => b.rescue_score - a.rescue_score)
     .slice(0, 5);
 
   // Attention list
-  const attentionProjects = seedProjects
+  const attentionProjects = projects
     .filter((p) => new Date(p.last_active_date) < new Date(Date.now() - 14 * 86400000))
     .sort((a, b) => new Date(a.last_active_date).getTime() - new Date(b.last_active_date).getTime());
 
@@ -156,7 +158,7 @@ export default function DashboardPage() {
       <div className="mt-6 bg-card card-shadow rounded-lg p-5">
         <h2 className="text-section-heading font-semibold mb-4">Recent Activity</h2>
         <div className="space-y-2">
-          {seedUpdates.slice(0, 8).map((u) => (
+          {updates.slice(0, 8).map((u) => (
             <div key={u.id} className="flex items-start gap-3 py-2 border-b border-border last:border-0">
               <span className="text-label text-accent-violet font-medium shrink-0 capitalize">{u.type.replace("_", " ")}</span>
               <div className="flex-1 min-w-0">

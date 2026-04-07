@@ -1,6 +1,7 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { MarkdownPanel } from "@/components/content/MarkdownPanel";
-import { seedModels, seedProjects } from "@/lib/seedData";
+import { seedModels } from "@/lib/seedData";
+import { useProjects } from "@/hooks/useAppData";
 import platformsContent from "../../content/platforms.md?raw";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -17,14 +18,15 @@ const platformMeta: Record<string, { category: string; bestFor: string }> = {
 };
 
 export default function PlatformsPage() {
-  const platforms = [...new Set(seedProjects.map((project) => project.platform_name))];
+  const [projects] = useProjects();
+  const platforms = [...new Set(projects.map((project) => project.platform_name))];
 
   return (
     <AppShell title="Platforms">
       <div className="space-y-4">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {platforms.map((platform) => {
-            const count = seedProjects.filter((project) => project.platform_name === platform).length;
+            const count = projects.filter((project) => project.platform_name === platform).length;
             const meta = platformMeta[platform] ?? { category: "General", bestFor: "General purpose work" };
             return (
               <div key={platform} className="rounded-xl border border-border bg-card p-5 card-shadow">

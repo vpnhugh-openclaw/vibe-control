@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
-import { seedProjects, seedUpdates, type SeedProject, type SeedUpdate } from "@/lib/seedData";
+import { type SeedProject, type SeedUpdate } from "@/lib/seedData";
 import { ProjectCard } from "@/components/projects/ProjectCard";
 import { ProjectTable } from "@/components/projects/ProjectTable";
 import { ProjectFiltersPanel, type ProjectFilters, DEFAULT_FILTERS } from "@/components/projects/ProjectFiltersPanel";
@@ -11,13 +11,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LayoutGrid, List, LifeBuoy, CalendarDays, Plus, Archive, Tag, UserCog, X } from "lucide-react";
 import { cn, timeAgo } from "@/lib/utils";
+import { useProjects, usePrompts, useUpdates } from "@/hooks/useAppData";
 import CalendarHeatmap from "react-calendar-heatmap";
 import "react-calendar-heatmap/dist/styles.css";
+import { toast } from "sonner";
 
 type ViewMode = "card" | "table" | "rescue" | "heatmap";
 
 const STATUS_OPTIONS = ["idea", "planning", "building", "testing", "launched", "paused", "stalled", "abandoned"];
-const ACCOUNT_OPTIONS = ["Primary", "Pharmacy", "Alt Dev"];
+const ACCOUNT_OPTIONS = ["Primary", "Ops", "Alt Dev"];
 const TAG_OPTIONS = ["urgent", "rescue", "pharmacy", "internal", "ai", "credits", "client"];
 
 function getProjectTags(project: SeedProject): string[] {
@@ -26,7 +28,7 @@ function getProjectTags(project: SeedProject): string[] {
   if (project.priority <= 2) tags.push("urgent");
   if (project.project_type.includes("pharmacy") || project.name.toLowerCase().includes("pharma") || project.name.toLowerCase().includes("rx")) tags.push("pharmacy");
   if (["Lovable", "Cursor", "VS Code + Copilot"].includes(project.platform_name)) tags.push("ai");
-  if (project.account_label === "Pharmacy") tags.push("client");
+  if (project.account_label === "Ops") tags.push("client");
   if (project.name.toLowerCase().includes("internal") || project.name.toLowerCase().includes("staff")) tags.push("internal");
   if ((project.blocker_summary || "").toLowerCase().includes("credit")) tags.push("credits");
   return [...new Set(tags)];
@@ -42,8 +44,9 @@ function buildProjectUpdatesMap(projects: SeedProject[], updates: SeedUpdate[]) 
 export default function ProjectsPage() {
   const [view, setView] = useState<ViewMode>("card");
   const [filters, setFilters] = useState<ProjectFilters>(DEFAULT_FILTERS);
-  const [projects, setProjects] = useState<SeedProject[]>(seedProjects);
-  const [updates, setUpdates] = useState<SeedUpdate[]>(seedUpdates);
+  const [projects, setProjects] = useProjects();
+  const [updates, setUpdates] = useUpdates();
+  const [prompts, setPrompts] = usePrompts();
   const [drawerProject, setDrawerProject] = useState<SeedProject | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -115,6 +118,25 @@ export default function ProjectsPage() {
     setProjects((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
   };
 
+  const handleDeleteProject = (projectToDelete: SeedProject) => {
+    setProjects((prev) => prev.filter((project) => project.id !== projectToDelete.id));
+    setUpdates((prev) => prev.filter((update) => update.project_name !== projectToDelete.name));
+    setPrompts((prev) =>
+      prev.map((prompt) => ({
+        ...prompt,
+        linked_project_ids: prompt.linked_project_ids.filter((projectId) => projectId !== projectToDelete.id),
+      }))
+    );
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.delete(projectToDelete.id);
+      return next;
+    });
+    setDrawerProject((current) => (current?.id === projectToDelete.id ? null : current));
+    setDrawerOpen(false);
+    toast.success(`Deleted ${projectToDelete.name}`);
+  };
+
   const handleAddNote = (projectId: string, content: string, type: string = "note") => {
     const project = projects.find((p) => p.id === projectId);
     if (!project || !content.trim()) return;
@@ -170,6 +192,22 @@ export default function ProjectsPage() {
 
   const archiveSelected = () => {
     setProjects((prev) => prev.map((p) => (selectedIds.has(p.id) ? { ...p, status: "abandoned" } : p)));
+    clearSelection();
+  };
+
+  const deleteSelected = () => {
+    const selectedProjects = projects.filter((project) => selectedIds.has(project.id));
+    if (selectedProjects.length === 0) return;
+
+    const confirmed = window.confirm(
+      selectedProjects.length === 1
+        ? `Delete ${selectedProjects[0].name} permanently? This will also remove related activity and prompt links.`
+        : `Delete ${selectedProjects.length} projects permanently? This will also remove related activity and prompt links.`
+    );
+
+    if (!confirmed) return;
+
+    selectedProjects.forEach(handleDeleteProject);
     clearSelection();
   };
 
@@ -386,6 +424,10 @@ export default function ProjectsPage() {
             Archive
           </Button>
 
+          <Button size="sm" className="bg-accent-red text-white hover:bg-accent-red/90" onClick={deleteSelected}>
+            Delete
+          </Button>
+
           <button onClick={clearSelection} className="ml-auto text-muted-foreground transition-colors hover:text-foreground">
             <X className="h-4 w-4" />
           </button>
@@ -397,8 +439,13 @@ export default function ProjectsPage() {
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         onSave={handleSave}
+        onDelete={handleDeleteProject}
         onAddNote={handleAddNote}
         updates={drawerProject ? projectUpdates[drawerProject.id] || [] : []}
+        prompts={prompts.filter((prompt) => drawerProject ? prompt.linked_project_ids.includes(drawerProject.id) : false)}
+        onLinkPrompt={(projectId, promptId) => {
+          setPrompts((prev) => prev.map((prompt) => prompt.id === promptId ? { ...prompt, linked_project_ids: Array.from(new Set([...prompt.linked_project_ids, projectId])) } : prompt));
+        }}
         isNew={drawerProject?.id.startsWith("new-")}
       />
     </AppShell>

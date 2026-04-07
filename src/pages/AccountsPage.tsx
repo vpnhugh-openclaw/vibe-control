@@ -1,14 +1,16 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { MarkdownPanel } from "@/components/content/MarkdownPanel";
-import { seedAccounts, seedProjects } from "@/lib/seedData";
+import { seedAccounts } from "@/lib/seedData";
+import { useProjects } from "@/hooks/useAppData";
 import accountsContent from "../../content/accounts.md?raw";
 import { Mail, ShieldCheck, Layers, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 export default function AccountsPage() {
+  const [projects] = useProjects();
   const activeAccounts = seedAccounts.filter((account) => account.is_active).length;
-  const platformsCovered = new Set(seedProjects.map((project) => project.platform_name)).size;
+  const platformsCovered = new Set(projects.map((project) => project.platform_name)).size;
 
   return (
     <AppShell title="Accounts">
@@ -25,7 +27,7 @@ export default function AccountsPage() {
             <h2 className="text-section-heading font-semibold">Account roster</h2>
             <div className="mt-4 space-y-3">
               {seedAccounts.map((account) => {
-                const projectCount = seedProjects.filter((project) => project.account_label === account.label).length;
+                const projectCount = projects.filter((project) => project.account_label === account.label).length;
                 return (
                   <div key={account.id} className="rounded-lg border border-border p-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">

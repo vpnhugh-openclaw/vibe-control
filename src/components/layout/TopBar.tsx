@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Bell, FolderKanban, BookOpen, Layers } from "lucide-react";
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command";
-import { seedPlatformsLike, seedProjects, seedPrompts } from "@/lib/topBarSearch";
+import { seedPlatformsLike } from "@/lib/topBarSearch";
+import { useProjects, usePrompts } from "@/hooks/useAppData";
 
 interface TopBarProps {
   title: string;
@@ -11,6 +12,8 @@ interface TopBarProps {
 export function TopBar({ title }: TopBarProps) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const [projects] = useProjects();
+  const [prompts] = usePrompts();
 
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
@@ -24,10 +27,10 @@ export function TopBar({ title }: TopBarProps) {
   }, []);
 
   const results = useMemo(() => ({
-    projects: seedProjects,
-    prompts: seedPrompts,
+    projects,
+    prompts,
     platforms: seedPlatformsLike,
-  }), []);
+  }), [projects, prompts]);
 
   return (
     <>

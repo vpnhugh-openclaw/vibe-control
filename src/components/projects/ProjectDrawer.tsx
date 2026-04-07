@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { SeedProject, type SeedUpdate } from "@/lib/seedData";
+import { SeedProject, type SeedPrompt, type SeedUpdate } from "@/lib/seedData";
 import { mockAI, type StallAssessmentResult } from "@/lib/mockAI";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,12 +10,22 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { timeAgo, cn } from "@/lib/utils";
-import { Save, Loader2, Paperclip } from "lucide-react";
+import { Save, Loader2, Paperclip, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const STATUSES = ["idea", "planning", "building", "testing", "launched", "paused", "stalled", "abandoned"];
 const PROJECT_TYPES = ["web_app", "mobile_app", "automation", "website_revamp", "scraping_tool", "api_integration", "pharmacy_business", "research_workflow", "other"];
-const ACCOUNTS = ["Primary", "Pharmacy", "Alt Dev"];
+const ACCOUNTS = ["Primary", "Ops", "Alt Dev"];
 const SCORE_STEPS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const DIAGNOSIS_STEPS = [1, 2, 3, 4, 5] as const;
 
@@ -45,8 +55,11 @@ interface ProjectDrawerProps {
   open: boolean;
   onClose: () => void;
   onSave: (project: SeedProject) => void;
+  onDelete: (project: SeedProject) => void;
   onAddNote: (projectId: string, content: string, type?: string) => void;
   updates: SeedUpdate[];
+  prompts: SeedPrompt[];
+  onLinkPrompt: (projectId: string, promptId: string) => void;
   isNew?: boolean;
 }
 
@@ -66,12 +79,13 @@ const defaultDiagnosis = (): DiagnosisForm => ({
   needs_scope_narrowing: false,
 });
 
-export function ProjectDrawer({ project, open, onClose, onSave, onAddNote, updates, isNew }: ProjectDrawerProps) {
+export function ProjectDrawer({ project, open, onClose, onSave, onDelete, onAddNote, updates, prompts, onLinkPrompt, isNew }: ProjectDrawerProps) {
   const [form, setForm] = useState<SeedProject | null>(null);
   const [newNote, setNewNote] = useState("");
   const [diagnosis, setDiagnosis] = useState<DiagnosisForm>(defaultDiagnosis());
   const [assessment, setAssessment] = useState<StallAssessmentResult | null>(null);
   const [isRunningAssessment, setIsRunningAssessment] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const p = form ?? project;
 
@@ -99,6 +113,13 @@ export function ProjectDrawer({ project, open, onClose, onSave, onAddNote, updat
   const handleSave = () => {
     if (!p) return;
     onSave(p);
+    onClose();
+  };
+
+  const handleDelete = () => {
+    if (!p) return;
+    onDelete(p);
+    setDeleteDialogOpen(false);
     onClose();
   };
 
@@ -226,10 +247,22 @@ export function ProjectDrawer({ project, open, onClose, onSave, onAddNote, updat
             </FieldGroup>
 
             <div className="border-t border-border pt-4">
-              <Button onClick={handleSave} className="w-full rounded-md bg-accent-violet text-primary-foreground hover:bg-accent-violet/90">
-                <Save className="mr-2 h-4 w-4" />
-                {isNew ? "Create Project" : "Save Changes"}
-              </Button>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                {!isNew ? (
+                  <Button
+                    variant="outline"
+                    onClick={() => setDeleteDialogOpen(true)}
+                    className="border-accent-red/30 text-accent-red hover:bg-accent-red/10 hover:text-accent-red sm:w-auto"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Project
+                  </Button>
+                ) : null}
+                <Button onClick={handleSave} className="w-full rounded-md bg-accent-violet text-primary-foreground hover:bg-accent-violet/90 sm:flex-1">
+                  <Save className="mr-2 h-4 w-4" />
+                  {isNew ? "Create Project" : "Save Changes"}
+                </Button>
+              </div>
             </div>
           </TabsContent>
 
@@ -370,17 +403,50 @@ export function ProjectDrawer({ project, open, onClose, onSave, onAddNote, updat
           </TabsContent>
 
           <TabsContent value="prompts" className="space-y-4 px-6 pb-6 pt-5">
-            <div className="rounded-lg border border-dashed border-border p-6 text-center">
-              <p className="text-body text-foreground">No prompts linked to this project yet.</p>
-              <p className="mt-1 text-body text-muted-foreground">Link an existing prompt or create a new rescue prompt from the diagnosis results.</p>
-              <div className="mt-4 flex flex-wrap justify-center gap-3">
-                <Button variant="outline">Link Prompt</Button>
-                <Button className="bg-accent-violet text-primary-foreground hover:bg-accent-violet/90">Create New Prompt</Button>
+            {prompts.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-border p-6 text-center">
+                <p className="text-body text-foreground">No prompts linked to this project yet.</p>
+                <p className="mt-1 text-body text-muted-foreground">Create one in Prompt Vault, then link it here from the prompt page.</p>
+                <Button variant="outline" className="mt-4" onClick={() => toast.info("Open Prompt Vault to create or link prompts")}>Open workflow hint</Button>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-3">
+                {prompts.map((prompt) => (
+                  <div key={prompt.id} className="rounded-lg border border-border p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-medium text-foreground">{prompt.title}</p>
+                        <p className="text-body text-muted-foreground capitalize">{prompt.category}</p>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => onLinkPrompt(p.id, prompt.id)}>
+                        Linked
+                      </Button>
+                    </div>
+                    <p className="mt-3 line-clamp-4 whitespace-pre-wrap text-body text-muted-foreground">{prompt.prompt_text}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </SheetContent>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this project?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove <span className="font-medium text-foreground">{p.name}</span>, its saved activity log, and any prompt links tied to it.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-accent-red text-white hover:bg-accent-red/90">
+              Delete permanently
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Sheet>
   );
 }

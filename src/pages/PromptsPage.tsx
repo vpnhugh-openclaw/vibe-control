@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import Markdown from "react-markdown";
 import { AppShell } from "@/components/layout/AppShell";
-import { seedProjects, seedPrompts, type SeedPrompt } from "@/lib/seedData";
+import { type SeedProject, type SeedPrompt } from "@/lib/seedData";
+import { useProjects, usePrompts } from "@/hooks/useAppData";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -33,7 +34,8 @@ const platformSlugMap: Record<string, string> = {
 };
 
 export default function PromptsPage() {
-  const [prompts, setPrompts] = useState<SeedPrompt[]>(seedPrompts);
+  const [projects] = useProjects();
+  const [prompts, setPrompts] = usePrompts();
   const [query, setQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
@@ -94,6 +96,20 @@ export default function PromptsPage() {
     toast.success("Copied!");
   };
 
+  const linkPromptToProject = (promptId: string, projectId: string) => {
+    setPrompts((prev) =>
+      prev.map((prompt) =>
+        prompt.id === promptId
+          ? {
+              ...prompt,
+              linked_project_ids: Array.from(new Set([...prompt.linked_project_ids, projectId])),
+              last_used_date: new Date().toISOString().slice(0, 10),
+            }
+          : prompt
+      )
+    );
+  };
+
   return (
     <AppShell title="Prompt Vault">
       <div className="space-y-4">
@@ -146,7 +162,7 @@ export default function PromptsPage() {
         ) : (
           <div className="grid gap-4 grid-cols-1 xl:grid-cols-2">
             {filteredPrompts.map((prompt) => {
-              const linkedProjects = seedProjects.filter((project) => prompt.linked_project_ids.includes(project.id));
+              const linkedProjects = projects.filter((project) => prompt.linked_project_ids.includes(project.id));
               return (
                 <div key={prompt.id} className="rounded-xl border border-border bg-card p-5 card-shadow space-y-4">
                   <div className="flex items-start justify-between gap-3">
@@ -208,7 +224,8 @@ export default function PromptsPage() {
         open={projectLinkOpen}
         onOpenChange={setProjectLinkOpen}
         prompt={projectToLink}
-        projects={seedProjects}
+        projects={projects}
+        onLink={linkPromptToProject}
       />
     </AppShell>
   );
@@ -302,7 +319,7 @@ function PromptEditorSheet({ open, onOpenChange, prompt, onSave }: { open: boole
   );
 }
 
-function ProjectLinkSheet({ open, onOpenChange, prompt, projects }: { open: boolean; onOpenChange: (open: boolean) => void; prompt: SeedPrompt | null; projects: typeof seedProjects }) {
+function ProjectLinkSheet({ open, onOpenChange, prompt, projects, onLink }: { open: boolean; onOpenChange: (open: boolean) => void; prompt: SeedPrompt | null; projects: SeedProject[]; onLink: (promptId: string, projectId: string) => void }) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="overflow-y-auto p-0 sm:max-w-[520px]">
@@ -320,7 +337,17 @@ function ProjectLinkSheet({ open, onOpenChange, prompt, projects }: { open: bool
                   <p className="font-medium text-foreground">{project.name}</p>
                   <p className="text-body text-muted-foreground">{project.next_action || project.short_description}</p>
                 </div>
-                <Button variant="outline" onClick={() => toast.success(`Linked prompt to ${project.name} (mock flow)`)}>Link</Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    if (!prompt) return;
+                    onLink(prompt.id, project.id);
+                    toast.success(`Linked prompt to ${project.name}`);
+                    onOpenChange(false);
+                  }}
+                >
+                  Link
+                </Button>
               </div>
             </div>
           ))}

@@ -175,18 +175,23 @@
 }
 
 /* react-calendar-heatmap overrides */
-.react-calendar-heatmap .color-empty {
+.react-calendar-heatmap .color-empty,
+.react-calendar-heatmap .heatmap-empty {
   fill: hsl(var(--bg-active));
 }
-.react-calendar-heatmap .color-scale-1 {
+.react-calendar-heatmap .color-scale-1,
+.react-calendar-heatmap .heatmap-cyan-1 {
   fill: hsl(var(--accent-cyan) / 0.2);
 }
-.react-calendar-heatmap .color-scale-2 {
+.react-calendar-heatmap .color-scale-2,
+.react-calendar-heatmap .heatmap-cyan-2 {
   fill: hsl(var(--accent-cyan) / 0.4);
 }
-.react-calendar-heatmap .color-scale-3 {
+.react-calendar-heatmap .color-scale-3,
+.react-calendar-heatmap .heatmap-cyan-3 {
   fill: hsl(var(--accent-cyan) / 0.65);
 }
-.react-calendar-heatmap .color-scale-4 {
+.react-calendar-heatmap .color-scale-4,
+.react-calendar-heatmap .heatmap-cyan-4 {
   fill: hsl(var(--accent-cyan));
 }
