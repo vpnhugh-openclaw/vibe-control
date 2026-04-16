@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import type { SeedProject, SeedPrompt, SeedUpdate } from "@/lib/seedData";
+import type { SeedProject, SeedPrompt } from "@/lib/seedData";
+import type { ProjectUpdate } from "@/lib/appData";
 import { mockAI, type StallAssessmentResult } from "@/lib/mockAI";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -57,7 +58,7 @@ interface ProjectDrawerProps {
   onSave: (project: SeedProject) => void;
   onDelete: (project: SeedProject) => void;
   onAddNote: (projectId: string, content: string, type?: string) => void;
-  updates: SeedUpdate[];
+  updates: ProjectUpdate[];
   prompts: SeedPrompt[];
   onLinkPrompt: (projectId: string, promptId: string) => void;
   isNew?: boolean;
