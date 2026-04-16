@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
-import { type SeedProject, type SeedUpdate } from "@/lib/seedData";
+import { type SeedProject } from "@/lib/seedData";
+import { type ProjectUpdate } from "@/lib/appData";
 import { ProjectCard } from "@/components/projects/ProjectCard";
 import { ProjectTable } from "@/components/projects/ProjectTable";
 import { ProjectFiltersPanel, type ProjectFilters, DEFAULT_FILTERS } from "@/components/projects/ProjectFiltersPanel";
@@ -34,9 +35,9 @@ function getProjectTags(project: SeedProject): string[] {
   return [...new Set(tags)];
 }
 
-function buildProjectUpdatesMap(projects: SeedProject[], updates: SeedUpdate[]) {
-  return projects.reduce<Record<string, SeedUpdate[]>>((acc, project) => {
-    acc[project.id] = updates.filter((u) => u.project_name === project.name);
+function buildProjectUpdatesMap(projects: SeedProject[], updates: ProjectUpdate[]) {
+  return projects.reduce<Record<string, ProjectUpdate[]>>((acc, project) => {
+    acc[project.id] = updates.filter((u) => u.project_id === project.id);
     return acc;
   }, {});
 }
@@ -102,12 +103,14 @@ export default function ProjectsPage() {
   const heatmapGroupedUpdates = useMemo(() => {
     if (!heatmapDate) return [];
     const sameDay = updates.filter((u) => u.created_at.slice(0, 10) === heatmapDate);
-    const grouped = sameDay.reduce<Record<string, SeedUpdate[]>>((acc, update) => {
-      acc[update.project_name] = [...(acc[update.project_name] || []), update];
+    const grouped = sameDay.reduce<Record<string, ProjectUpdate[]>>((acc, update) => {
+      const project = projects.find((p) => p.id === update.project_id);
+      const label = project?.name ?? update.project_id;
+      acc[label] = [...(acc[label] || []), update];
       return acc;
     }, {});
     return Object.entries(grouped);
-  }, [heatmapDate, updates]);
+  }, [heatmapDate, updates, projects]);
 
   const openProject = (project: SeedProject) => {
     setDrawerProject(project);
@@ -120,7 +123,7 @@ export default function ProjectsPage() {
 
   const handleDeleteProject = (projectToDelete: SeedProject) => {
     setProjects((prev) => prev.filter((project) => project.id !== projectToDelete.id));
-    setUpdates((prev) => prev.filter((update) => update.project_name !== projectToDelete.name));
+    setUpdates((prev) => prev.filter((update) => update.project_id !== projectToDelete.id));
     setPrompts((prev) =>
       prev.map((prompt) => ({
         ...prompt,
@@ -144,7 +147,7 @@ export default function ProjectsPage() {
     setUpdates((prev) => [
       {
         id: `u-${Date.now()}`,
-        project_name: project.name,
+        project_id: projectId,
         type,
         content,
         created_at: new Date().toISOString(),
